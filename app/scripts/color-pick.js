@@ -193,18 +193,6 @@
     }
   };
 
-
-
-  // undefined is used here as the undefined global variable in ECMAScript 3 is
-  // mutable (ie. it can be changed by someone else). undefined isn't really being
-  // passed in so we can ensure the value of it is truly undefined. In ES5, undefined
-  // can no longer be modified.
-
-  // window and document are passed through as local variables rather than globals
-  // as this (slightly) quickens the resolution process and can be more efficiently
-  // minified (especially when both are regularly referenced in your plugin).
-
-  // Create the defaults once
   var pluginName = 'colorFilter',
       document = window.document,
       defaults = {
@@ -294,32 +282,6 @@
         bulletClassName: 'color'
       };
 
-          
-      
-  // The actual plugin constructor
-  function Plugin( element, options ) {
-    this.el = element;
-    this.$el = $(element);
-    this.selected = "";
-    this.isColorPanelOpen = false;
-
-    // jQuery has an extend method which merges the contents of two or 
-    // more objects, storing the result in the first object. The first object
-    // is generally empty as we don't want to alter the default options for
-    // future instances of the plugin
-    this.options = $.extend(true, {}, defaults, options);
-
-    this.el.className = this.options.className;
-
-    this.data = this.options.colorGroups;
-
-    this._defaults = defaults;
-    this._name = pluginName;
-    this.pallete = [];
-
-    this.init();
-  }
-  
   function buildPallete(){
     var i = 0,
         len = this.data.length,
@@ -349,23 +311,9 @@
       e.preventDefault();
   }
 
-
-  Plugin.prototype.init = function () {
-    // Place initialization logic here
-    // You already have access to the DOM element and the options via the instance, 
-    // e.g., this.element and this.options
-    _this = this;
-    buildPallete.apply(this);
-    var pallete = new Views.Pallete(this.pallete).render()
-    this.$el.append(pallete);
-
-    events.call(this);
-
-  };
-
   function events(){
     this.$el.on('namechange.filter', function(e, data){
-      _this.$el.find(".color-options-down span").text(data.name)
+      _this.$el.find(".color-options-down span").text(data.name);
     });
 
     this.$el.on('selectedcolor.filter', function(e, data){
@@ -375,8 +323,35 @@
 
     this.$el.on('paneltoggle.filter', togglePanels.bind(this));
 
-    this.$el.on('click', '.color-back', togglePanels.bind(this));
+    this.$el.on('click.filter', '.color-back', togglePanels.bind(this));
   }
+
+
+  function Plugin( element, options ) {
+    this.el = element;
+    this.$el = $(element);
+    this.selected = "";
+    this.isColorPanelOpen = false;
+    this.options = $.extend(true, {}, defaults, options);
+    this.el.className = this.options.className;
+    this.data = this.options.colorGroups;
+    this._defaults = defaults;
+    this._name = pluginName;
+    this.pallete = [];
+
+    this.init();
+  }
+
+
+  Plugin.prototype.init = function () {
+    _this = this;
+    buildPallete.apply(this);
+    var pallete = new Views.Pallete(this.pallete).render();
+    this.$el.append(pallete);
+
+    events.call(this);
+
+  };
 
 
   // A really lightweight plugin wrapper around the constructor, 
