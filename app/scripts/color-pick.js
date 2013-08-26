@@ -105,7 +105,7 @@
 
   Views.Color.prototype.bindEvents = function(){
     this.$el.on("click.filter", Callbacks.colorClick.bind(this));
-    this.$el.on("mouseenter.filter", Callbacks.bulletMouseEnter.bind(this));
+    this.$el.on('mouseenter.filter', Callbacks.bulletMouseEnter.bind(this));
   };
   
   
@@ -133,7 +133,7 @@
 
   Views.ColorGroup.prototype.bindEvents = function(){
     this.$el.on("click.filter", Callbacks.groupClick.bind(this));
-    this.$el.on('mouseenter.filter', Callbacks.bulletMouseEnter.bind(this))
+    this.$el.on('mouseenter.filter', Callbacks.bulletMouseEnter.bind(this));
   };
   
   Views.Pallete = function(pallete){
