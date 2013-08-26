@@ -320,7 +320,7 @@
     this.init();
   }
   
-  var buildPallete = function(){
+  function buildPallete(){
     var i = 0,
         len = this.data.length,
         colorGroup;
@@ -331,34 +331,7 @@
     return this.pallete;
   };
 
-
-  Plugin.prototype.init = function () {
-    // Place initialization logic here
-    // You already have access to the DOM element and the options via the instance, 
-    // e.g., this.element and this.options
-    _this = this;
-    buildPallete.apply(this);
-    var pallete = new Views.Pallete(this.pallete).render()
-    this.$el.append(pallete)
-    console.log(this);
-
-
-    this.$el.on('namechange.filter', function(e, data){
-      _this.$el.find(".color-options-down span").text(data.name)
-    });
-
-    this.$el.on('selectedcolor.filter', function(e, data){
-      _this.selected = data.model.value;
-      _this.$el.find('.color-sample').css('background-color', _this.selected)
-    });
-
-    this.$el.on('paneltoggle.filter', this.togglePanels.bind(this));
-
-    this.$el.on('click', '.color-back', this.togglePanels.bind(this));
-
-  };
-
-  Plugin.prototype.togglePanels = function(e){
+  function togglePanels(e){
       var panel = $(_this.$el).find(".color-panel"),
           upperPanel = $(_this.$el).find(".color-options-upper")
           buttonPanel = $('.color-back');
@@ -374,6 +347,35 @@
       }
       buttonPanel.toggle(this.isColorPanelOpen);
       e.preventDefault();
+  }
+
+
+  Plugin.prototype.init = function () {
+    // Place initialization logic here
+    // You already have access to the DOM element and the options via the instance, 
+    // e.g., this.element and this.options
+    _this = this;
+    buildPallete.apply(this);
+    var pallete = new Views.Pallete(this.pallete).render()
+    this.$el.append(pallete);
+
+    events.call(this);
+
+  };
+
+  function events(){
+    this.$el.on('namechange.filter', function(e, data){
+      _this.$el.find(".color-options-down span").text(data.name)
+    });
+
+    this.$el.on('selectedcolor.filter', function(e, data){
+      _this.selected = data.model.value;
+      _this.$el.find('.color-sample').css('background-color', _this.selected)
+    });
+
+    this.$el.on('paneltoggle.filter', togglePanels.bind(this));
+
+    this.$el.on('click', '.color-back', togglePanels.bind(this));
   }
 
 
