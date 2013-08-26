@@ -1,11 +1,11 @@
 /*
- *  Project: 
- *  Description: 
- *  Author: 
- *  License: 
+ *  Project:
+ *  Description:
+ *  Author:
+ *  License:
  */
 
-// the semi-colon before function invocation is a safety net against concatenated 
+// the semi-colon before function invocation is a safety net against concatenated
 // scripts and/or other plugins which may not be closed properly.
 ;(function ( $, window, undefined ) {
 
@@ -26,7 +26,7 @@
     this.config = config;
     this.rangeFirstColorValue = config.groupRange[0];
     this.rangeLastColorValue = config.groupRange[1];
-   
+
     this.colors = [];
     this.name = this.config.groupName;
   }
@@ -56,25 +56,25 @@
 
   };
 
-  //Views  
+  //Views
   var Views = { };
   //esos son todos los html!!
   Views.Templates = {
-    
+
     bullet:     "<li data-id='pick-<%= name %>'>"+
                   "<span class='color-bubble'>"+
                     "<span class='color-half' style= 'background-color: <%= rangeFirstColorValue %>'></span>"+
                     "<span class='color-half' style= 'background-color: <%= rangeLastColorValue %>'></span>"+
                   "</span>"+
                 "</li>",
-    
+
     simpleBullet:   "<li>"+
                       "<span class='color-bubble' style= 'background-color: <%=value %>'>"+
                       "</span>"+
                     "</li>",
-    
+
     groupColors: "<ul id='pick-<%= name %>'></ul>",
-    
+
     pallete: '<div class="color-container">' +
                 '<a href="#" class="color-toggle">' +
                     '<span class="color-bubble color-sample"></span>' +
@@ -85,15 +85,15 @@
                   '<div class="color-panel"> </div>' +
                     '<div class="color-options-down">'+
                         '<a href="#" class="color-back">back</a>'+
-                        '<span>text</span>'+
+                        '<span class="color-text">Color</span>'+
                     '</div>'+
                 '</div>'+
              '</div>'
   };
-  
+
   Views.Color  = function(color){
-    this.model = color; 
-    this.$el; 
+    this.model = color;
+    this.$el;
   };
 
   Views.Color.prototype.render = function(){
@@ -106,27 +106,28 @@
   Views.Color.prototype.bindEvents = function(){
     this.$el.on("click.filter", Callbacks.colorClick.bind(this));
     this.$el.on('mouseenter.filter', Callbacks.bulletMouseEnter.bind(this));
+    this.$el.on('mouseleave.filter', Callbacks.bulletMouseOut.bind(this));
   };
-  
-  
+
+
   Views.ColorGroup = function(colorGroup){
    this.$colorsEl = null;
    this.$el = null;
    this.model = colorGroup;
   };
-  
+
   Views.ColorGroup.prototype.render = function(){
     this.$el = $(_.template(Views.Templates.bullet)(this.model));
-    
+
     //Create group colors list
     this.$colorsEl = $(_.template(Views.Templates.groupColors)(this.model));
 
     _.each(this.model.generateColors(), function(color, index, colors){
         var colorView = new Views.Color(color);
         this.$colorsEl.append(colorView.render());
-        
+
       }, this);
-    
+
     this.bindEvents();
     return this.$el;
   }
@@ -134,13 +135,14 @@
   Views.ColorGroup.prototype.bindEvents = function(){
     this.$el.on("click.filter", Callbacks.groupClick.bind(this));
     this.$el.on('mouseenter.filter', Callbacks.bulletMouseEnter.bind(this));
+    this.$el.on('mouseleave.filter', Callbacks.bulletMouseOut.bind(this));
   };
-  
+
   Views.Pallete = function(pallete){
     this.pallete = pallete;
     this.$el;
   };
-  
+
   Views.Pallete.prototype.render = function(){
 
     this.$el = $(_.template(Views.Templates.pallete)({}));
@@ -154,7 +156,7 @@
       $colorGroupUL.append(colorGroupView.$el);
       $groupColorsList.append(colorGroupView.$colorsEl);
     }, this);
-  
+
     this.bindEvents();
     return this.$el;
   };
@@ -179,6 +181,15 @@
       parent.trigger('namechange.filter', {
         name: name,
         model: this.model
+      });
+    },
+
+    bulletMouseOut: function(e){
+      var el = e.target,
+          name = this.model.name,
+          parent = $(el).closest('.dropdown-colors');
+      parent.trigger('namechange.filter', {
+        name: "Color"
       });
     },
 
@@ -282,6 +293,11 @@
         bulletClassName: 'color'
       };
 
+  function setSelected(color){
+    this.selected = color;
+    this.$el.trigger("changecolor.filter", color)
+  }
+
   function buildPallete(){
     var i = 0,
         len = this.data.length,
@@ -295,15 +311,15 @@
 
   function togglePanels(e){
       var panel = $(_this.$el).find(".color-panel"),
-          upperPanel = $(_this.$el).find(".color-options-upper")
+          upperPanel = $(_this.$el).find(".color-options-upper"),
           buttonPanel = $('.color-back');
 
       if(!this.isColorPanelOpen){
         panel.show(100);
-        upperPanel.hide(50);
+        upperPanel.hide(100);
         this.isColorPanelOpen = !this.isColorPanelOpen;
       }else{
-        panel.hide(50);
+        panel.hide(100);
         upperPanel.show(100);
         this.isColorPanelOpen = !this.isColorPanelOpen;
       }
@@ -317,13 +333,20 @@
     });
 
     this.$el.on('selectedcolor.filter', function(e, data){
-      _this.selected = data.model.value;
-      _this.$el.find('.color-sample').css('background-color', _this.selected)
+      setSelected.call(_this, data.model.value);
     });
 
     this.$el.on('paneltoggle.filter', togglePanels.bind(this));
 
     this.$el.on('click.filter', '.color-back', togglePanels.bind(this));
+
+    this.$el.on('changecolor.filter', function(e, color){
+      _this.$el.find('.color-sample').css('background-color', color)
+    });
+
+    this.$el.on('click.filter', '.cancel-selection', function(e){
+      setSelected.call(_this, "");
+    });
   }
 
 
@@ -346,17 +369,35 @@
   Plugin.prototype.init = function () {
     _this = this;
     buildPallete.apply(this);
-    var pallete = new Views.Pallete(this.pallete).render();
+    var pallete = new Views.Pallete(this.pallete).render(),
+        upperPanel,
+        cancelSelection = $('<li><a href="#" class="cancel-selection">hola</a></li>');
     this.$el.append(pallete);
-
+    upperPanel = $(_this.$el).find(".color-options-upper");
+    upperPanel.append(cancelSelection);
     events.call(this);
 
   };
+  var methods = {};
+  Plugin.prototype.select = function(option){
+    if(!option){
+      return this.selected;
+    }else{
+      setSelected.call(this, option);
+    }
+  }
 
 
-  // A really lightweight plugin wrapper around the constructor, 
+  // A really lightweight plugin wrapper around the constructor,
   // preventing against multiple instantiations
   $.fn[pluginName] = function ( options ) {
+    var method = Array.prototype.slice.call(arguments, 0, 1),
+        args = Array.prototype.slice.call(arguments, 1),
+        data = $(this).data('plugin_' + pluginName);
+    if(data && data[method]){
+      return data[method].apply(data, args);
+    }
+
     return this.each(function () {
       if (!$.data(this, 'plugin_' + pluginName)) {
         $.data(this, 'plugin_' + pluginName, new Plugin( this, options ));

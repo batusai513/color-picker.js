@@ -10,7 +10,6 @@ body {
 				background: white;
 				display: none;
 				top: 0;
-				width: 100%;
 			}
 			.color-panel ul{display: none;}
             .color-container{
@@ -20,20 +19,26 @@ body {
             	position: relative;
             	width: 150px;
             }
+            .color-options:before{
+                display: block;
+                content: "▴";
+                position: absolute;
+                top: -13px;
+                font-size: 13px;
+                color: #C4C4C4;
+                left: 50%;
+                margin-left: -6px;
+            }
             .color-toggle,
             .color-options{
                 background-color: #FDFEFC;
                 border: 2px solid #C4C4C4;
                 border-radius: 4px;
-            }
-            .color-options ul,
-            .color-options ul li{
-                margin: 0;
-                padding: 0;
+                font-family: helvetica, Arial, sans-serif;
             }
             .color-options ul li{
                 display: inline-block;
-                vertical-align: middle;
+                vertical-align: top;
                 line-height: 1;
                 margin: 1px;
             }
@@ -69,16 +74,39 @@ body {
                 text-align: center;
                 right: -2px;
                 color: white;
-                line-height: 190%;
+                line-height: 195%;
                 border-radius: 0 4px 4px 0;
             }
             .color-arrow:after{
                 display: block;
                 content: "▾";
-                font-size: 18px;
+                font-size: 14px;
             }
             .color-back{
             	display: none;
+            }
+            .color-options-upper,
+            .color-options-down,
+            .color-panel{
+                padding: 4px 2px;
+            }
+            .color-options-down{
+                background-color: #f6f6f6;
+                overflow: hidden;
+                font-size: 12px;
+                color: #606060;
+            }
+            .color-text{
+                float: right;
+            }
+            .cancel-selection{
+                background: url(../images/cancel_color_picker.png) no-repeat;
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                text-indent: 100%;
+                overflow: hidden;
+                border:1px solid transparent;
             }
 .hero-unit {
     margin: 50px auto 0 auto;
