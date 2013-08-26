@@ -170,14 +170,14 @@
       this.$colorsEl.parent().children().hide();
       this.$colorsEl.show();
       var el = e.target,
-          parent = $(el).closest('.dropdown-colors');
+          parent = $(el).closest('.picker-wrapper');
       parent.trigger('paneltoggle.filter', this);
     },
 
     bulletMouseEnter: function(e){
       var el = e.target,
           name = this.model.name,
-          parent = $(el).closest('.dropdown-colors');
+          parent = $(el).closest('.picker-wrapper');
       parent.trigger('namechange.filter', {
         name: name,
         model: this.model
@@ -187,7 +187,7 @@
     bulletMouseOut: function(e){
       var el = e.target,
           name = this.model.name,
-          parent = $(el).closest('.dropdown-colors');
+          parent = $(el).closest('.picker-wrapper');
       parent.trigger('namechange.filter', {
         name: "Color"
       });
@@ -196,7 +196,7 @@
     colorClick: function(e){
       var el = e.target,
           name = this.model.name,
-          parent = $(el).closest('.dropdown-colors');
+          parent = $(el).closest('.picker-wrapper');
       parent.trigger('selectedcolor.filter', {
         name: name,
         model: this.model
@@ -249,8 +249,12 @@
           groupName: "greens",
           groupRange: ["#9DD00F","#89B60D"],
           colors: [{
-            colorName: "blue",
-            colorHex: "#333333"
+            colorName: "Green",
+            colorHex: "#9DD00F"
+          },
+          {
+            colorName: "Ligth Green",
+            colorHex: "#89B60D"
           }]
         },
 
@@ -258,8 +262,12 @@
           groupName: "Blues",
           groupRange: ["#2DA7D7","#2792BC"],
           colors: [{
-            colorName: "blue",
-            colorHex: "#333333"
+            colorName: "Blue",
+            colorHex: "#2DA7D7"
+          },
+          {
+            colorName: "Ligth Blue",
+            colorHex: "#2792BC"
           }]
         },
 
@@ -267,8 +275,12 @@
           groupName: "Pinks",
           groupRange: ["#FF3BA7","#DF3392"],
           colors: [{
-            colorName: "blue",
-            colorHex: "#333333"
+            colorName: "Pink",
+            colorHex: "#FF3BA7"
+          },
+          {
+            colorName: "Ligth Pink",
+            colorHex: "#DF3392"
           }]
         },
 
@@ -276,24 +288,29 @@
           groupName: "Purples",
           groupRange: ["#9E48AB","#8A3F95"],
           colors: [{
-            colorName: "blue",
-            colorHex: "#333333"
+            colorName: "Purple",
+            colorHex: "#9E48AB"
+          },
+          {
+            colorName: "Ligth Purple",
+            colorHex: "#8A3F95"
           }]
         },
         {
           groupName: "Blacks",
           groupRange: ["#000000","#000000"],
           colors: [{
-            colorName: "blue",
-            colorHex: "#333333"
+            colorName: "Black",
+            colorHex: "#000000"
           }]
-        },
+        }
         ],
-        className: 'dropdown inline-block dropdown-colors',
+        className: 'dropdown inline-block color-filter',
         bulletClassName: 'color'
       };
 
   function setSelected(color){
+    var color = color.trim();
     this.selected = color;
     this.$el.trigger("changecolor.filter", color)
   }
@@ -310,8 +327,8 @@
   };
 
   function togglePanels(e){
-      var panel = $(_this.$el).find(".color-panel"),
-          upperPanel = $(_this.$el).find(".color-options-upper"),
+      var panel = $(_this.$wrapper).find(".color-panel"),
+          upperPanel = $(_this.$wrapper).find(".color-options-upper"),
           buttonPanel = $('.color-back');
 
       if(!this.isColorPanelOpen){
@@ -328,23 +345,25 @@
   }
 
   function events(){
-    this.$el.on('namechange.filter', function(e, data){
-      _this.$el.find(".color-options-down span").text(data.name);
+    this.$wrapper.on('namechange.filter', function(e, data){
+      _this.$wrapper.find(".color-options-down span").text(data.name);
     });
 
-    this.$el.on('selectedcolor.filter', function(e, data){
+    this.$wrapper.on('selectedcolor.filter', function(e, data){
       setSelected.call(_this, data.model.value);
     });
 
-    this.$el.on('paneltoggle.filter', togglePanels.bind(this));
+    this.$wrapper.on('paneltoggle.filter', togglePanels.bind(this));
 
-    this.$el.on('click.filter', '.color-back', togglePanels.bind(this));
+    this.$wrapper.on('click.filter', '.color-back', togglePanels.bind(this));
 
-    this.$el.on('changecolor.filter', function(e, color){
-      _this.$el.find('.color-sample').css('background-color', color)
+    this.$wrapper.on('changecolor.filter', function(e, color){
+      _this.$wrapper.find('.color-sample').css('background-color', color);
+      _this.$el.val(color);
     });
 
-    this.$el.on('click.filter', '.cancel-selection', function(e){
+    this.$wrapper.on('click.filter', '.cancel-selection', function(e){
+      e.preventDefault();
       setSelected.call(_this, "");
     });
   }
@@ -356,7 +375,6 @@
     this.selected = "";
     this.isColorPanelOpen = false;
     this.options = $.extend(true, {}, defaults, options);
-    this.el.className = this.options.className;
     this.data = this.options.colorGroups;
     this._defaults = defaults;
     this._name = pluginName;
@@ -368,22 +386,27 @@
 
   Plugin.prototype.init = function () {
     _this = this;
+    this.$wrapper = this.$el.wrap('<div class="picker-wrapper">').parent();
     buildPallete.apply(this);
     var pallete = new Views.Pallete(this.pallete).render(),
         upperPanel,
         cancelSelection = $('<li><a href="#" class="cancel-selection">hola</a></li>');
-    this.$el.append(pallete);
-    upperPanel = $(_this.$el).find(".color-options-upper");
+    this.$wrapper.addClass(this.options.className);
+    this.$wrapper.append(pallete);
+    upperPanel = $(_this.$wrapper).find(".color-options-upper");
     upperPanel.append(cancelSelection);
     events.call(this);
 
   };
+
+
   var methods = {};
   Plugin.prototype.select = function(option){
-    if(!option){
+    console.log(option)
+    if(!option && option !== ""){
       return this.selected;
     }else{
-      setSelected.call(this, option);
+        setSelected.call(this, option);
     }
   }
 

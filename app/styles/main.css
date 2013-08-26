@@ -11,6 +11,18 @@ body {
 				display: none;
 				top: 0;
 			}
+            .color-filter{
+                position: relative;
+            }
+            .color-filter input{
+                width: 0;
+                height: 1px;
+                overflow: hidden;
+                position: absolute;
+                -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+                filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+                opacity: 0;
+            }
 			.color-panel ul{display: none;}
             .color-container{
                 display: inline-block;
