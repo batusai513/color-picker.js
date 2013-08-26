@@ -12,6 +12,7 @@ body {
 				top: 0;
 				width: 100%;
 			}
+			.color-panel ul{display: none;}
             .color-container{
                 display: inline-block;
             }

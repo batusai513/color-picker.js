@@ -61,7 +61,7 @@
   //esos son todos los html!!
   Views.Templates = {
     
-    bullet:     "<li>"+
+    bullet:     "<li data-id='pick-<%= name %>'>"+
                   "<span class='color-bubble'>"+
                     "<span class='color-half' style= 'background-color: <%= rangeFirstColorValue %>'></span>"+
                     "<span class='color-half' style= 'background-color: <%= rangeLastColorValue %>'></span>"+
@@ -73,7 +73,7 @@
                       "</span>"+
                     "</li>",
     
-    groupColors: "<ul></ul>",
+    groupColors: "<ul id='pick-<%= name %>'></ul>",
     
     pallete: '<div class="color-container">' +
                 '<a href="#" class="color-toggle">' +
@@ -119,7 +119,7 @@
     this.$el = $(_.template(Views.Templates.bullet)(this.model));
     
     //Create group colors list
-    this.$colorsEl = $(_.template(Views.Templates.groupColors)({}));
+    this.$colorsEl = $(_.template(Views.Templates.groupColors)(this.model));
 
     _.each(this.model.generateColors(), function(color, index, colors){
         var colorView = new Views.Color(color);
@@ -165,9 +165,11 @@
   var Callbacks = {
 
     groupClick: function(e){
+      this.$colorsEl.parent().children().hide();
+      this.$colorsEl.show();
       var el = e.target,
           parent = $(el).closest('.dropdown-colors');
-      parent.trigger('paneltoggle.filter');
+      parent.trigger('paneltoggle.filter', this);
     },
 
     bulletMouseEnter: function(e){
@@ -342,7 +344,6 @@
 
 
     this.$el.on('namechange.filter', function(e, data){
-      console.log(data.model)
       _this.$el.find(".color-options-down span").text(data.name)
     });
 
